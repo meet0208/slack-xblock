@@ -29,42 +29,38 @@ pip install slack-xblock
 
 ## Configuration
 
-This XBlock requires configuration at both the environment level and within Open edX.
+This XBlock requires setting the Slack variables inside the Open edX common settings.  
+The recommended way (when using Tutor) is to create a simple plugin such as `slack-xblock` (or any name you prefer) and set these variables using the Tutor hooks.
 
-Environment Variables
+Create a plugin file and add the following:
 
-First, you need to set up the following environment variables in your Open edX instance. You can add these to a .env file or your platform's configuration management system.
+```python
+from tutor import hooks
 
-Here's an example:
+hooks.Filters.ENV_PATCHES.add_items(
+    [
+        (
+            "openedx-common-settings",
+            """
+INSTALLED_APPS += ['slack_xblock']
+FEATURES['ENABLE_SLACK_XBLOCK'] = True
 
-```.env.example
+SLACK_BOT_TOKEN = "your-bot-token"
+SLACK_SIGNING_SECRET = "your-signing-secret"
+AUTO_CREATE_CHANNELS = True
+CHANNEL_PREFIX = "course-"            (optional)
+CHANNEL_SUFFIX = "-discussion"        (optional)
+DEFAULT_WORKSPACE_URL = "https://your-workspace.slack.com"
+WORKSPACE_INVITE_URL = "https://your-invite-link"
+"""
+        )
+    ]
+)
 
-Slack API Credentials
-
-Your bot's xoxb token
-SLACK_BOT_TOKEN=
-
-Your app's signing secret
-SLACK_SIGNING_SECRET=
-
-Auto-channel creation settings
-Set to 'True' to automatically create channels, 'False' to disable
-AUTO_CREATE_CHANNELS=True
-
-Prefix for auto-created channel names (e.g., 'course-')
-CHANNEL_PREFIX=course-
-
-Suffix for auto-created channel names (e.g., '-discussion')
-CHANNEL_SUFFIX=-discussion
-
-Default workspace settings
-The main URL of your Slack workspace (e.g., "https://your-team.slack.com")
-DEFAULT_WORKSPACE_URL="your-workspace-url"
-
-The invite link for your workspace
-WORKSPACE_INVITE_URL="workspace-invite"
 
 ```
+Replace the placeholder values with your actual Slack workspace data.
+After enabling the Tutor plugin and rebuilding/restarting LMS and CMS, the Slack XBlock will read these settings from Django.
 
 - SLACK_BOT_TOKEN: Your Slack app's Bot User OAuth Token (starts with xoxb-).
 
@@ -89,13 +85,10 @@ FEATURES['ENABLE_SLACK_XBLOCK'] = True
 
 2. Configure in Studio:
 
+- Add "slack_xblock" inside the advanced settings module lists.
 - Add Slack component to course units
 - Set workspace URL and channel settings
 - Customize display options
-
-## Usage
-
-For detailed usage instructions, see the [Installation Guide](docs/installation.md).
 
 ## License
 
